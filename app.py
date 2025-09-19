@@ -103,16 +103,6 @@ def main():
         - "Can we create custom templates through the API?"
         """)
 
-    # Chat interface
-    st.markdown("---")
-
-    # Display conversation history
-    for i, (question, response) in enumerate(st.session_state.conversation_history):
-        with st.container():
-            st.markdown(f"**🔍 Question:** {question}")
-            st.markdown(response)
-            st.markdown("---")
-
     # Input area
     user_input = st.text_input(
         "What would you like to know about OneFlow's capabilities?",
@@ -120,11 +110,14 @@ def main():
         key="user_input"
     )
 
-    # Submit button
-    col1, col2 = st.columns([1, 4])
+    # Submit and Clear buttons
+    col1, col2, col3 = st.columns([1, 1, 2])
     with col1:
         ask_button = st.button("🔍 Assess Feasibility", type="primary")
+    with col2:
+        clear_button = st.button("🗑️ Clear Conversation")
 
+    # PROCESS BUTTON CLICKS FIRST (before displaying conversation history)
     if ask_button and user_input:
         with st.spinner("Analyzing feasibility..."):
             try:
@@ -134,12 +127,26 @@ def main():
                 # Add to conversation history
                 st.session_state.conversation_history.append((user_input, response))
 
-                # Clear input and rerun to show the new conversation
-                st.session_state.user_input = ""
+                # Rerun to show the new conversation (input will clear naturally)
                 st.rerun()
 
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
+
+    # Handle clear conversation button
+    if clear_button:
+        st.session_state.conversation_history = []
+        st.rerun()
+
+    # Chat interface - DISPLAY AFTER PROCESSING
+    st.markdown("---")
+
+    # Display conversation history
+    for i, (question, response) in enumerate(st.session_state.conversation_history):
+        with st.container():
+            st.markdown(f"**🔍 Question:** {question}")
+            st.markdown(response)
+            st.markdown("---")
 
 
 def process_feasibility_question(question: str) -> str:
